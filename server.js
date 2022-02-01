@@ -1,6 +1,6 @@
 var express = require("express");
 var app = express();
-var db = require("./database.js");
+var db = require("./db.js");
 var md5 = require("md5");
 const { linkType, get } = require("get-content");
 
