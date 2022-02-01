@@ -5,7 +5,7 @@ const DBSOURCE = "db.sqlite";
 
 let db = new sqlite3.Database(DBSOURCE, (err) => {
   if (err) {
-    // Cannot open database
+    // Cannot open database sas
     console.error(err.message);
     throw err;
   } else {
