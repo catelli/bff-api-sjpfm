@@ -29,6 +29,24 @@ let db = new sqlite3.Database(DBSOURCE, (err) => {
         }
       }
     );
+    db.run(
+      `CREATE TABLE datamusic (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            artist text, 
+            duration int
+            )`,
+      (err) => {
+        if (err) {
+          // Table already created
+        } else {
+          // Table just created, creating some rows
+          var insert =
+            "INSERT INTO datamusic (artist, duration) VALUES (?,?,?)";
+          db.run(insert, ["artist", "artist name"]);
+          db.run(insert, ["duration", 0]);
+        }
+      }
+    );
   }
 });
 

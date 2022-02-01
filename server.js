@@ -30,6 +30,21 @@ app.get("/api/users", (req, res, next) => {
   });
 });
 
+app.get("/api/music-data-db", (req, res, next) => {
+  var sql = "select * from user";
+  var params = [];
+  db.all(sql, params, (err, rows) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    res.json({
+      message: "success",
+      data: rows,
+    });
+  });
+});
+
 app.get("/api/music-data", (req, res, next) => {
   const url = "http://sysrad.net:6464/currentsong?sid=1";
   const MusicDataUrl =
@@ -127,6 +142,29 @@ app.patch("/api/user/:id", (req, res, next) => {
       res.json({
         message: "success",
         data: data,
+      });
+    }
+  );
+});
+
+app.patch("/api/update-sdr", (req, res, next) => {
+  var data = {
+    artist: req.body.artist,
+    duration: req.body.duration,
+  };
+  db.run(
+    `UPDATE datamusic set 
+            artist = coalesce(?,artist), 
+            duration = COALESCE(?,duration),
+            WHERE id = 0`,
+    [data.artist, data.duration],
+    (err, result) => {
+      if (err) {
+        //res.status(400).json({ error: res.message });
+        return;
+      }
+      res.json({
+        message: "success - datamusic up to date!",
       });
     }
   );
