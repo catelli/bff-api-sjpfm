@@ -44,6 +44,16 @@ app.get("/api/music-data-db", (req, res, next) => {
     });
   });
 });
+app.get("/api/insert", (req, res, next) => {
+  db.run(`INSERT INTO datamusic VALUES(NULL,'SJPFM', '25')`, (err, result) => {
+    if (err) {
+      return;
+    }
+    res.json({
+      message: "success - insert data!",
+    });
+  });
+});
 
 app.get("/api/music-data", (req, res, next) => {
   const url = "http://sysrad.net:6464/currentsong?sid=1";
@@ -158,7 +168,7 @@ app.patch("/api/update-sdr", (req, res, next) => {
     `', duration='` +
     data.duration +
     `' WHERE id='1'`;
-
+  console.log(sql);
   db.run(sql, [], (err, result) => {
     if (err) {
       db.run(
