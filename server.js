@@ -31,7 +31,7 @@ app.get("/api/users", (req, res, next) => {
 });
 
 app.get("/api/music-data-db", (req, res, next) => {
-  var sql = "select * from user";
+  var sql = "select * from datamusic";
   var params = [];
   db.all(sql, params, (err, rows) => {
     if (err) {
@@ -152,22 +152,32 @@ app.patch("/api/update-sdr", (req, res, next) => {
     artist: req.body.artist,
     duration: req.body.duration,
   };
-  db.run(
-    `UPDATE datamusic set 
-            artist = coalesce(?,artist), 
-            duration = COALESCE(?,duration),
-            WHERE id = 0`,
-    [data.artist, data.duration],
-    (err, result) => {
-      if (err) {
-        //res.status(400).json({ error: res.message });
-        return;
-      }
-      res.json({
-        message: "success - datamusic up to date!",
-      });
+  var sql =
+    `UPDATE datamusic SET artist='` +
+    data.artist +
+    `', duration='` +
+    data.duration +
+    `' WHERE id='1'`;
+
+  db.run(sql, [], (err, result) => {
+    if (err) {
+      db.run(
+        `INSERT INTO datamusic VALUES(NULL,'SJPFM', '25')`,
+        (err, result) => {
+          if (err) {
+            return;
+          }
+          res.json({
+            message: "success - insert data!",
+          });
+        }
+      );
+      return;
     }
-  );
+    res.json({
+      message: "success - datamusic up to date!",
+    });
+  });
 });
 
 app.delete("/api/user/:id", (req, res, next) => {
