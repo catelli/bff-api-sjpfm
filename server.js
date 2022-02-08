@@ -61,27 +61,29 @@ app.get("/api/music-data", (req, res, next) => {
     "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=09659d39f048e5188ea96fb1ea76776e&artist=cher&track=believe&format=json";
 
   async function getAlbumImg() {
-    let settings = { method: "Get" };
+    let settings = { method: "GET" };
 
     fetch(MusicDataUrl, settings).then((res) => {
       var jsonRes = res.json();
     });
   }
 
-  get(url)
-    .then((pageContent) => {
-      deleteHtml = pageContent.replace(/<\/?[^>]+(>|$)/g, "");
-      res.json({
-        message: "success",
-        artist: "Mock Artist",
-        music: "Mock Music",
-        albumImg:
-          "https://lastfm.freetls.fastly.net/i/u/300x300/3b54885952161aaea4ce2965b2db1638.png",
-      });
-    })
-    .catch((err) => {
+  var sql = "SELECT artist FROM datamusic WHERE id = 1";
+  var params = [];
+  db.get(sql, params, (err, row) => {
+    if (err) {
       res.status(400).json({ error: err.message });
+      return;
+    }
+    let splitMusic = row.artist.split("-");
+    res.json({
+      message: "success",
+      artist: splitMusic[0],
+      music: splitMusic[1],
+      albumImg:
+        "https://lastfm.freetls.fastly.net/i/u/300x300/3b54885952161aaea4ce2965b2db1638.png",
     });
+  });
 });
 
 app.get("/api/user/:id", (req, res, next) => {
@@ -171,21 +173,11 @@ app.patch("/api/update-sdr", (req, res, next) => {
   console.log(sql);
   db.run(sql, [], (err, result) => {
     if (err) {
-      db.run(
-        `INSERT INTO datamusic VALUES(NULL,'SJPFM', '25')`,
-        (err, result) => {
-          if (err) {
-            return;
-          }
-          res.json({
-            message: "success - insert data!",
-          });
-        }
-      );
       return;
     }
     res.json({
       message: "success - datamusic up to date!",
+      data: result,
     });
   });
 });
