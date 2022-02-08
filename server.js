@@ -94,11 +94,11 @@ app.get("/api/music-data", (req, res, next) => {
       .then((result) => {
         let resultImg = JSON.parse(result);
         const getImageUrl = resultImg.tracks.items[0].album.images[0].url;
-        console.log(resultImg.tracks.items[0].album.images[0].url);
+        console.log(resultImg.tracks.items[0]);
         res.json({
           message: "success",
-          artist: splitMusic[0],
-          music: splitMusic[1],
+          artist: resultImg.tracks.items[0].artists[0].name,
+          music: resultImg.tracks.items[0].name,
           albumImg: getImageUrl,
         });
       })
