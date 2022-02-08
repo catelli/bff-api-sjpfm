@@ -1,10 +1,10 @@
-var express = require("express");
+import express from "express";
 var app = express();
-var db = require("./db.js");
-var md5 = require("md5");
-const { linkType, get } = require("get-content");
+import db from "./db.js";
+import md5 from "md5";
+import fetch from "node-fetch";
 
-var bodyParser = require("body-parser");
+import bodyParser from "body-parser";
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -76,13 +76,33 @@ app.get("/api/music-data", (req, res, next) => {
       return;
     }
     let splitMusic = row.artist.split("-");
-    res.json({
-      message: "success",
-      artist: splitMusic[0],
-      music: splitMusic[1],
-      albumImg:
-        "https://lastfm.freetls.fastly.net/i/u/300x300/3b54885952161aaea4ce2965b2db1638.png",
-    });
+
+    let userToken =
+      "BQDBWCOmYUNy83UxItOhbftsjt9HRhILnlqjDzh8hLlzeeSh3gIs7njp8fpeB7g9Iox8IzqDInLb7wM42QkjEcEiBlwiCDtvyDxiFVeZgz_d9Chbe85zt9SGQ1NB12WCT0uyi9hr1NDfQXyrCvQiBj6ClIliEGWhg9i136no8NFMxxhry_5Bzo1yYvdaa60jJyfb3MapE4wd7cRPW0eC5KGlpI7I8CUMw2hzFtfoYnlKp6i9Pl4KwabS1xDSihSDnqYmBgV8ntfI6Lk31m2jNEo";
+
+    let requestOptions = {
+      method: "GET",
+      headers: { authorization: `Bearer ${userToken}` },
+      redirect: "follow",
+    };
+
+    fetch(
+      `https://api.spotify.com/v1/search?q=${splitMusic[0]}%20${splitMusic[1]}&type=track%2Cartist&limit=1`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        let resultImg = JSON.parse(result);
+        const getImageUrl = resultImg.tracks.items[0].album.images[0].url;
+        console.log(resultImg.tracks.items[0].album.images[0].url);
+        res.json({
+          message: "success",
+          artist: splitMusic[0],
+          music: splitMusic[1],
+          albumImg: getImageUrl,
+        });
+      })
+      .catch((error) => console.log("error", error));
   });
 });
 
