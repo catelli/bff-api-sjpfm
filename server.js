@@ -102,8 +102,6 @@ app.get("/api/music-data", (req, res, next) => {
     }
     let splitMusic = row.artist.split("-");
 
-    splitMusic = ["akon", ""];
-
     spotifyApi.clientCredentialsGrant().then(
       function (data) {
         // Save the access token so that it's used in future calls
