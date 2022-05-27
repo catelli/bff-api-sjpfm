@@ -46,6 +46,21 @@ let db = new sqlite3.Database(DBSOURCE, (err) => {
         }
       }
     );
+
+    db.run(
+      `CREATE TABLE tokendb (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            token text
+            )`,
+      (err) => {
+        if (err) {
+        } else {
+          // Table just created, creating some rows
+          var insert = `INSERT INTO tokendb (token) VALUES ('firstToken')`;
+          db.run(insert);
+        }
+      }
+    );
   }
 });
 

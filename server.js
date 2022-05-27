@@ -8,6 +8,15 @@ import bodyParser from "body-parser";
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+import SpotifyWebApi from "spotify-web-api-node";
+
+// credentials are optional
+var spotifyApi = new SpotifyWebApi({
+  clientId: "9e994d2346bc498280374a0458fcebe3",
+  clientSecret: "9a4398374af0433bbb08cdf8cbbdcfee",
+  redirectUri: "http://localhost:8000/api/callback",
+});
+
 var HTTP_PORT = 8000;
 
 // Start server
@@ -38,6 +47,22 @@ app.get("/api/music-data-db", (req, res, next) => {
       res.status(400).json({ error: err.message });
       return;
     }
+    res.json({
+      message: "success",
+      data: rows,
+    });
+  });
+});
+
+app.get("/api/token-db", (req, res, next) => {
+  var sql = "select * from tokendb";
+  var params = [];
+  db.all(sql, params, (err, rows) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+
     res.json({
       message: "success",
       data: rows,
@@ -77,32 +102,60 @@ app.get("/api/music-data", (req, res, next) => {
     }
     let splitMusic = row.artist.split("-");
 
-    let userToken =
-      "BQDBWCOmYUNy83UxItOhbftsjt9HRhILnlqjDzh8hLlzeeSh3gIs7njp8fpeB7g9Iox8IzqDInLb7wM42QkjEcEiBlwiCDtvyDxiFVeZgz_d9Chbe85zt9SGQ1NB12WCT0uyi9hr1NDfQXyrCvQiBj6ClIliEGWhg9i136no8NFMxxhry_5Bzo1yYvdaa60jJyfb3MapE4wd7cRPW0eC5KGlpI7I8CUMw2hzFtfoYnlKp6i9Pl4KwabS1xDSihSDnqYmBgV8ntfI6Lk31m2jNEo";
+    splitMusic = ["akon", ""];
 
-    let requestOptions = {
-      method: "GET",
-      headers: { authorization: `Bearer ${userToken}` },
-      redirect: "follow",
-    };
+    spotifyApi.clientCredentialsGrant().then(
+      function (data) {
+        console.log("The access token expires in " + data.body["expires_in"]);
+        console.log("The access token is " + data.body["access_token"]);
 
-    fetch(
-      `https://api.spotify.com/v1/search?q=${splitMusic[0]}%20${splitMusic[1]}&type=track%2Cartist&limit=1`,
-      requestOptions
-    )
-      .then((response) => response.text())
-      .then((result) => {
-        let resultImg = JSON.parse(result);
-        const getImageUrl = resultImg.tracks.items[0].album.images[0].url;
-        console.log(resultImg.tracks.items[0]);
-        res.json({
-          message: "success",
-          artist: resultImg.tracks.items[0].artists[0].name,
-          music: resultImg.tracks.items[0].name,
-          albumImg: getImageUrl,
-        });
-      })
-      .catch((error) => console.log("error", error));
+        // Save the access token so that it's used in future calls
+        spotifyApi.setAccessToken(data.body["access_token"]);
+        const userToken = data.body["access_token"];
+        console.log("userToken", userToken);
+        let requestOptions = {
+          method: "GET",
+          headers: { authorization: `Bearer ${userToken}` },
+          redirect: "follow",
+        };
+
+        fetch(
+          `https://api.spotify.com/v1/search?q=${splitMusic[0]}%20${splitMusic[1]}&type=track%2Cartist&limit=1`,
+          requestOptions
+        )
+          .then((response) => response.text())
+          .then((result) => {
+            let resultImg = JSON.parse(result);
+            console.log(resultImg);
+            const verifyRows = resultImg.tracks.items.length;
+
+            if (verifyRows === 0) {
+              res.json({
+                message: "success",
+                artist: "SJPFM",
+                music: "87.9",
+                albumImg: "logo.png",
+              });
+              return;
+            }
+
+            const getImageUrl = resultImg.tracks.items[0].album.images[0].url;
+            res.json({
+              message: "success",
+              artist: resultImg.tracks.items[0].artists[0].name,
+              music: resultImg.tracks.items[0].name,
+              albumImg: getImageUrl,
+            });
+          })
+          .catch((error) => console.log("error", error));
+      },
+      function (err) {
+        console.log(
+          "Something went wrong when retrieving an access token",
+          err
+        );
+      }
+    );
   });
 });
 
