@@ -106,13 +106,9 @@ app.get("/api/music-data", (req, res, next) => {
 
     spotifyApi.clientCredentialsGrant().then(
       function (data) {
-        console.log("The access token expires in " + data.body["expires_in"]);
-        console.log("The access token is " + data.body["access_token"]);
-
         // Save the access token so that it's used in future calls
         spotifyApi.setAccessToken(data.body["access_token"]);
         const userToken = data.body["access_token"];
-        console.log("userToken", userToken);
         let requestOptions = {
           method: "GET",
           headers: { authorization: `Bearer ${userToken}` },
@@ -126,7 +122,6 @@ app.get("/api/music-data", (req, res, next) => {
           .then((response) => response.text())
           .then((result) => {
             let resultImg = JSON.parse(result);
-            console.log(resultImg);
             const verifyRows = resultImg.tracks.items.length;
 
             if (verifyRows === 0) {
@@ -243,7 +238,6 @@ app.patch("/api/update-sdr", (req, res, next) => {
     `', duration='` +
     data.duration +
     `' WHERE id='1'`;
-  console.log(sql);
   db.run(sql, [], (err, result) => {
     if (err) {
       return;
