@@ -4,6 +4,16 @@ import db from "./db.js";
 import md5 from "md5";
 import fetch from "node-fetch";
 
+const cors = require("cors");
+
+const app = express();
+
+var corsOptions = {
+  origin: "http://localhost:3000",
+};
+
+app.use(cors());
+
 import bodyParser from "body-parser";
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
