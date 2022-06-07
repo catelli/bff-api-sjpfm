@@ -4,7 +4,7 @@ import db from "./db.js";
 import md5 from "md5";
 import fetch from "node-fetch";
 
-const cors = require("cors");
+import cors from "cors";
 
 var corsOptions = {
   origin: "http://localhost:3000",
